@@ -292,3 +292,198 @@ codeEditor.addEventListener("click", updateLineNumbers);
 codeEditor.addEventListener("keyup", updateLineNumbers);
 codeEditor.addEventListener("scroll", () => { $("lineNumbers").scrollTop = codeEditor.scrollTop; });
 loadWorkspace();
+
+// GitHub integration V0.4 — read-only. Token exists only in this page's JS memory.
+let githubToken = "";
+let githubRepos = [];
+let selectedRepo = null;
+let selectedRepoFile = null;
+let repoFiles = [];
+const githubApi = "https://api.github.com";
+const githubTextExtensions = new Set(["html","htm","css","scss","js","mjs","cjs","ts","tsx","jsx","json","md","txt","yml","yaml","xml","svg","py","java","kt","kts","gradle","properties","toml","ini","sh","sql","go","rs","php","vue","svelte","dart","c","h","cpp","hpp","cs","rb","env"]);
+const githubBlocked = new Set(["node_modules",".git","dist","build",".next",".cache"]);
+const gh = id => document.getElementById(id);
+function githubMessage(message, state="") {
+  const el = gh("githubMessage");
+  if (!el) return;
+  el.textContent = message;
+  el.className = "github-message " + state;
+}
+function githubHeaders() {
+  return { "Accept":"application/vnd.github+json", "Authorization":`Bearer ${githubToken}`, "X-GitHub-Api-Version":"2022-11-28" };
+}
+async function githubRequest(path) {
+  if (!githubToken) throw new Error("Connect GitHub terlebih dahulu.");
+  const response = await fetch(githubApi + path, {headers:githubHeaders()});
+  let data;
+  try { data = await response.json(); } catch { data = {}; }
+  if (!response.ok) {
+    if (response.status === 401) throw new Error("Token tidak valid atau sudah kedaluwarsa (401).");
+    if (response.status === 403) throw new Error("Akses ditolak atau API rate limit tercapai (403). Periksa izin token.");
+    if (response.status === 404) throw new Error("Repository atau file tidak ditemukan, atau token tidak memiliki akses.");
+    throw new Error(data.message || `GitHub API error: ${response.status}`);
+  }
+  return data;
+}
+function updateGithubUi(connected) {
+  gh("connectGithub").disabled = connected;
+  gh("disconnectGithub").disabled = !connected;
+  gh("refreshRepos").disabled = !connected;
+  gh("repoSelect").disabled = !connected;
+  gh("githubToken").disabled = connected;
+  gh("githubConnectionState").textContent = connected ? "CONNECTED" : "DISCONNECTED";
+  gh("githubConnectionTitle").textContent = connected ? "GitHub account connected" : "Connect your GitHub account";
+}
+async function connectGithub() {
+  const token = gh("githubToken").value.trim();
+  if (!token) return githubMessage("Paste your GitHub Personal Access Token first.", "error");
+  if (!/^(github_pat_|gh[pousr]_|[a-f0-9]{40})/i.test(token)) return githubMessage("Format token tidak dikenali. Pastikan token berasal dari GitHub.", "error");
+  githubToken = token;
+  gh("connectGithub").disabled = true;
+  githubMessage("Checking token and loading repositories…", "pending");
+  try {
+    const user = await githubRequest("/user");
+    const repos = await githubRequest("/user/repos?visibility=all&affiliation=owner,collaborator,organization_member&sort=updated&per_page=100");
+    githubRepos = repos.filter(repo => !repo.archived);
+    const select = gh("repoSelect");
+    select.replaceChildren();
+    if (!githubRepos.length) {
+      const option = document.createElement("option"); option.value=""; option.textContent="No accessible repositories"; select.append(option);
+    }
+    for (const repo of githubRepos) {
+      const option = document.createElement("option");
+      option.value = repo.full_name;
+      option.textContent = `${repo.full_name}${repo.private ? " · private" : ""}`;
+      select.append(option);
+    }
+    updateGithubUi(true);
+    gh("githubConnectionTitle").textContent = `Connected as @${user.login}`;
+    gh("repoSelect").disabled = !githubRepos.length;
+    gh("loadRepo").disabled = !githubRepos.length;
+    githubMessage(`Connected as @${user.login}. Loaded ${githubRepos.length} repositories. Token remains in page memory only.`, "success");
+  } catch (error) {
+    githubToken = "";
+    gh("githubToken").value = "";
+    updateGithubUi(false);
+    gh("connectGithub").disabled = false;
+    githubMessage(error.message, "error");
+  }
+}
+function disconnectGithub() {
+  githubToken = "";
+  githubRepos = [];
+  selectedRepo = null;
+  selectedRepoFile = null;
+  repoFiles = [];
+  gh("githubToken").value = "";
+  gh("repoSelect").replaceChildren(new Option("Connect GitHub first",""));
+  gh("repoSummary").textContent = "No repository selected.";
+  gh("repoFileTree").innerHTML = '<div class="tree-empty">Connect GitHub to browse files.</div>';
+  gh("repoFileCount").textContent = "0";
+  gh("repoPreviewName").textContent = "FILE PREVIEW";
+  gh("repoPreviewContent").textContent = "Select a text file from the repository.";
+  gh("importRepoFile").disabled = true;
+  gh("loadRepo").disabled = true;
+  gh("repoFileSearch").disabled = true;
+  updateGithubUi(false);
+  gh("connectGithub").disabled = false;
+  githubMessage("Disconnected. Token cleared from page memory.", "success");
+}
+async function openGithubRepo() {
+  if (!githubToken) return;
+  const fullName = gh("repoSelect").value;
+  const repo = githubRepos.find(item => item.full_name === fullName);
+  if (!repo) return;
+  selectedRepo = repo;
+  selectedRepoFile = null;
+  gh("loadRepo").disabled = true;
+  gh("repoFileSearch").disabled = true;
+  gh("repoFileTree").innerHTML = '<div class="tree-empty">Loading repository tree…</div>';
+  gh("repoPreviewName").textContent = "FILE PREVIEW";
+  gh("repoPreviewContent").textContent = "Select a text file from the repository.";
+  gh("importRepoFile").disabled = true;
+  try {
+    const branch = repo.default_branch || "main";
+    const tree = await githubRequest(`/repos/${encodeURIComponent(repo.owner.login)}/${encodeURIComponent(repo.name)}/git/trees/${encodeURIComponent(branch)}?recursive=1`);
+    if (tree.truncated) githubMessage("Repository tree is large; GitHub returned a partial file list.", "pending");
+    repoFiles = (tree.tree || []).filter(item => item.type === "blob" && item.size <= 1048576 && item.path.split("/").every(part => !githubBlocked.has(part)) && githubTextExtensions.has((item.path.split(".").pop() || "").toLowerCase())).slice(0,500);
+    gh("repoSummary").textContent = `${repo.full_name} · branch ${branch} · ${repo.private ? "Private" : "Public"} · ${repoFiles.length} text files listed`;
+    gh("repoFileSearch").disabled = false;
+    renderGithubFiles();
+    githubMessage(`Loaded ${repoFiles.length} text files from ${repo.full_name}. Select a file to preview it.`, "success");
+  } catch (error) {
+    gh("repoFileTree").textContent = error.message;
+    githubMessage(error.message, "error");
+  } finally { gh("loadRepo").disabled = false; }
+}
+function renderGithubFiles() {
+  const query = gh("repoFileSearch").value.trim().toLowerCase();
+  const matches = repoFiles.filter(file => file.path.toLowerCase().includes(query));
+  const tree = gh("repoFileTree");
+  tree.replaceChildren();
+  gh("repoFileCount").textContent = String(matches.length);
+  if (!matches.length) {
+    const empty=document.createElement("div"); empty.className="tree-empty"; empty.textContent="No matching text files."; tree.append(empty); return;
+  }
+  for (const file of matches) {
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="file-item" + (selectedRepoFile?.path === file.path ? " selected" : "");
+    const icon=document.createElement("span"); icon.className="file-icon"; icon.textContent="◇";
+    const label=document.createElement("span"); label.textContent=file.path; label.title=file.path;
+    button.append(icon,label);
+    button.addEventListener("click",()=>previewGithubFile(file));
+    tree.append(button);
+  }
+}
+async function previewGithubFile(file) {
+  if (!selectedRepo || !githubToken) return;
+  selectedRepoFile = file;
+  gh("repoPreviewName").textContent = file.path;
+  gh("repoPreviewContent").textContent = "Fetching file contents…";
+  gh("importRepoFile").disabled = true;
+  renderGithubFiles();
+  try {
+    const data = await githubRequest(`/repos/${encodeURIComponent(selectedRepo.owner.login)}/${encodeURIComponent(selectedRepo.name)}/contents/${file.path.split("/").map(encodeURIComponent).join("/")}?ref=${encodeURIComponent(selectedRepo.default_branch || "main")}`);
+    if (data.encoding !== "base64" || !data.content) throw new Error("GitHub returned an unsupported file format.");
+    const binary = atob(data.content.replace(/\\s/g,""));
+    const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+    const content = new TextDecoder("utf-8",{fatal:false}).decode(bytes);
+    selectedRepoFile = {...file,content};
+    gh("repoPreviewContent").textContent = content.length > 60000 ? content.slice(0,60000) + "\n\n… preview truncated at 60,000 characters." : content;
+    gh("importRepoFile").disabled = false;
+  } catch (error) {
+    gh("repoPreviewContent").textContent = error.message;
+    githubMessage(error.message, "error");
+  }
+}
+async function importGithubFile() {
+  if (!selectedRepoFile?.content || !selectedRepo) return;
+  const path = safePath(selectedRepoFile.path);
+  if (!path) return githubMessage("File path rejected for safety.", "error");
+  try {
+    await persistFile({path,content:selectedRepoFile.content,updatedAt:Date.now(),size:new Blob([selectedRepoFile.content]).size,source:`github:${selectedRepo.full_name}`});
+    renderTree();
+    openFile(path);
+    githubMessage(`Imported ${path} into local Workspace. Remote repository was not changed.`, "success");
+    showView("editor");
+  } catch (error) { githubMessage(error.message, "error"); }
+}
+gh("connectGithub").addEventListener("click", connectGithub);
+gh("disconnectGithub").addEventListener("click", disconnectGithub);
+gh("refreshRepos").addEventListener("click", async () => { if (githubToken) { githubRepos=[]; await connectGithubRefresh(); } });
+async function connectGithubRefresh() {
+  try {
+    const repos=await githubRequest("/user/repos?visibility=all&affiliation=owner,collaborator,organization_member&sort=updated&per_page=100");
+    githubRepos=repos.filter(repo=>!repo.archived);
+    const select=gh("repoSelect"); select.replaceChildren();
+    for(const repo of githubRepos){const option=document.createElement("option");option.value=repo.full_name;option.textContent=`${repo.full_name}${repo.private?" · private":""}`;select.append(option);}
+    gh("repoSelect").disabled=!githubRepos.length;gh("loadRepo").disabled=!githubRepos.length;
+    githubMessage(`Repository list refreshed: ${githubRepos.length} repositories.`,"success");
+  } catch(error){githubMessage(error.message,"error");}
+}
+gh("loadRepo").addEventListener("click",openGithubRepo);
+gh("repoFileSearch").addEventListener("input",renderGithubFiles);
+gh("importRepoFile").addEventListener("click",importGithubFile);
+gh("toggleToken").addEventListener("click",()=>{const input=gh("githubToken");input.type=input.type==="password"?"text":"password";gh("toggleToken").textContent=input.type==="password"?"Show":"Hide";});
+window.addEventListener("pagehide",()=>{githubToken="";});
