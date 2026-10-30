@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090912">
+  <meta name="description" content="KoiCode AI — local-first autonomous coding workspace.">
+  <title>KoiCode AI — Cyberpunk Developer Workspace</title>
+  <link rel="stylesheet" href="./src/styles.css">
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="KoiCode home"><span class="brand-mark">K<span>◆</span></span><span><b>KOICODE</b><small>LOCAL DEV SYSTEM</small></span></a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="nav" aria-label="Main navigation">
+        <button class="nav-item active" data-view="dashboard"><span>◈</span> Dashboard</button>
+        <button class="nav-item" data-view="projects"><span>▣</span> Projects <em>V0.2</em></button>
+        <button class="nav-item" data-view="assistant"><span>⌘</span> AI Assistant <em>V0.4</em></button>
+        <button class="nav-item" data-view="agent"><span>⟡</span> Agent Tasks <em>V0.6</em></button>
+        <button class="nav-item" data-view="editor"><span>⌗</span> Code Editor <em>V0.3</em></button>
+      </nav>
+      <div class="side-label second">SYSTEM</div>
+      <nav class="nav">
+        <button class="nav-item" data-view="models"><span>◉</span> Model Center <em>V0.4</em></button>
+        <button class="nav-item" data-view="github"><span>⌂</span> GitHub Link <em>V0.2</em></button>
+        <button class="nav-item" data-view="settings"><span>⚙</span> Settings</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="device-card"><div class="device-top"><span class="pulse"></span> DEVICE PROFILE</div><b>Android · Browser</b><small>Low-memory mode planned</small></div>
+        <div class="version">KOICODE CORE <span>0.1.0</span></div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button>
+        <div class="breadcrumb">KOICODE <span>/</span> <b id="crumb">DASHBOARD</b></div>
+        <div class="top-actions"><span class="status-pill"><i></i> UI ONLINE</span><button class="avatar" title="KoiCode profile">K</button></div>
+      </header>
+      <section class="view active" id="view-dashboard">
+        <div class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="line"></span> AUTONOMOUS CODING WORKSPACE</div>
+            <h1>Build beyond<br><span>the ordinary.</span></h1>
+            <p>KoiCode adalah ruang kerja coding local-first. Siapkan proyek, hubungkan model lokal, lalu biarkan agent membantu pekerjaan teknis secara terkontrol.</p>
+            <div class="hero-actions"><button class="btn primary" data-go="projects">＋ Add project</button><button class="btn ghost" data-go="models">Check device <span>↗</span></button></div>
+          </div>
+          <div class="core-visual" aria-label="KoiCode system visualization"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="core"><span>KOI</span><small>CORE</small></div><div class="orbit-tag tag-one">LOCAL AI</div><div class="orbit-tag tag-two">AGENT SYSTEM</div><div class="orbit-tag tag-three">GITHUB</div></div>
+        </div>
+        <div class="section-heading"><div><div class="eyebrow">SYSTEM OVERVIEW</div><h2>Workspace status</h2></div><span class="muted">BUILD 0.1.0 / PREVIEW</span></div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-icon cyan">▣</div><span>PROJECTS</span><strong>0</strong><small>No repositories connected</small></article>
+          <article class="stat-card"><div class="stat-icon purple">◉</div><span>LOCAL MODEL</span><strong class="small-value">Not loaded</strong><small>Waiting for compatibility check</small></article>
+          <article class="stat-card"><div class="stat-icon pink">⟡</div><span>AGENT TASKS</span><strong>0</strong><small>Agent engine planned for V0.6</small></article>
+          <article class="stat-card"><div class="stat-icon green">⌂</div><span>GITHUB</span><strong class="small-value">Not linked</strong><small>Manual connection planned for V0.2</small></article>
+        </div>
+        <div class="content-grid">
+          <article class="panel quick-panel"><div class="panel-head"><div><div class="eyebrow">GET STARTED</div><h3>Initialize your workspace</h3></div><span class="panel-number">01—04</span></div>
+            <button class="setup-row" data-go="models"><span class="step">01</span><span><b>Check browser compatibility</b><small>Inspect WebGPU and device capabilities</small></span><span class="arrow">↗</span></button>
+            <button class="setup-row" data-go="github"><span class="step">02</span><span><b>Connect GitHub</b><small>Repository access will be added in V0.2</small></span><span class="lock">V0.2</span></button>
+            <button class="setup-row" data-go="projects"><span class="step">03</span><span><b>Select a project</b><small>Import a repository into workspace</small></span><span class="lock">V0.2</span></button>
+            <button class="setup-row" data-go="assistant"><span class="step">04</span><span><b>Load a local model</b><small>Adaptive model selection is planned</small></span><span class="lock">V0.4</span></button>
+          </article>
+          <article class="panel activity-panel"><div class="panel-head"><div><div class="eyebrow">LIVE FEED</div><h3>Activity log</h3></div><span class="live-dot">● LIVE</span></div><div class="empty-activity"><div class="empty-symbol">⌁</div><b>No activity yet</b><p>System events and agent actions will appear here.</p></div></article>
+        </div>
+        <footer>KOICODE AI <span>•</span> LOCAL-FIRST BY DESIGN <span>•</span> V0.1 FOUNDATION</footer>
+      </section>
+      <section class="view" id="view-models">
+        <div class="page-title"><div class="eyebrow">HARDWARE DIAGNOSTICS</div><h1>Model <span>Center</span></h1><p>Periksa dukungan browser sebelum mengunduh model AI.</p></div>
+        <div class="panel diagnostic-panel"><div class="panel-head"><div><div class="eyebrow">DEVICE COMPATIBILITY</div><h3>Browser capability scan</h3></div><span class="tag">LOCAL CHECK</span></div>
+          <div class="diagnostic-list"><div class="diagnostic-row"><span>WebGPU API</span><b id="gpuStatus" class="pending">Checking…</b></div><div class="diagnostic-row"><span>WebAssembly</span><b id="wasmStatus" class="pending">Checking…</b></div><div class="diagnostic-row"><span>Device memory hint</span><b id="memoryStatus" class="pending">Checking…</b></div><div class="diagnostic-row"><span>Hardware concurrency</span><b id="cpuStatus" class="pending">Checking…</b></div></div>
+          <button class="btn primary" id="rescan">↻ Run compatibility scan</button><p class="notice">Catatan: hasil ini hanya pemeriksaan awal. Dukungan WebGPU tidak menjamin model tertentu dapat dimuat. Browser tidak selalu mengungkap RAM fisik yang sebenarnya.</p>
+        </div>
+        <div class="panel model-placeholder"><div class="eyebrow">ADAPTIVE MODEL ROUTER</div><h3>Model selection is not active yet</h3><p>V0.4 akan memilih kandidat model berdasarkan dukungan runtime, ukuran model, context, dan batas memori. Tidak ada model yang diunduh pada V0.1.</p></div>
+      </section>
+      <section class="view" id="view-projects"><div class="page-title"><div class="eyebrow">YOUR CODEBASES</div><h1>Project <span>Vault</span></h1><p>Repository workspace akan tersedia pada V0.2.</p></div><div class="panel empty-state"><div class="empty-symbol">▣</div><h3>No project connected</h3><p>Hubungkan repository GitHub untuk mulai membaca dan mengelola file proyek.</p><button class="btn primary" data-go="github">GitHub connection <span>↗</span></button></div></section>
+      <section class="view" id="view-github"><div class="page-title"><div class="eyebrow">SOURCE CONTROL</div><h1>GitHub <span>Link</span></h1><p>Koneksi manual dengan akses terbatas akan dibangun pada V0.2.</p></div><div class="panel model-placeholder"><div class="github-mark">⌂</div><h3>Repository integration — planned</h3><p>V0.1 belum meminta atau menyimpan Personal Access Token. Pada V0.2, token hanya akan digunakan dalam sesi aktif dan tidak ditulis ke source code atau localStorage.</p><span class="tag">COMING IN V0.2</span></div></section>
+      <section class="view" id="view-assistant"><div class="page-title"><div class="eyebrow">LOCAL INFERENCE</div><h1>AI <span>Assistant</span></h1><p>Chat lokal akan diaktifkan setelah runtime dan model selesai diintegrasikan.</p></div><div class="panel empty-state"><div class="empty-symbol">◉</div><h3>AI engine not connected</h3><p>KoiCode tidak menggunakan AI cloud sebagai pengganti diam-diam. Status akan tetap offline sampai model lokal benar-benar aktif.</p><button class="btn ghost" data-go="models">Check compatibility</button></div></section>
+      <section class="view" id="view-agent"><div class="page-title"><div class="eyebrow">AUTONOMOUS WORKFLOW</div><h1>Agent <span>Tasks</span></h1><p>Perencanaan dan eksekusi tugas multi-langkah akan hadir setelah AI engine tersedia.</p></div><div class="panel empty-state"><div class="empty-symbol">⟡</div><h3>Agent engine offline</h3><p>Task planner, file operations, review, dan test runner belum aktif pada V0.1.</p></div></section>
+      <section class="view" id="view-editor"><div class="page-title"><div class="eyebrow">CODE WORKSPACE</div><h1>Code <span>Editor</span></h1><p>Editor dan file explorer akan dibangun pada V0.3.</p></div><div class="panel empty-state"><div class="empty-symbol">⌗</div><h3>No workspace opened</h3><p>Belum ada repository yang terhubung.</p></div></section>
+      <section class="view" id="view-settings"><div class="page-title"><div class="eyebrow">PREFERENCES</div><h1>System <span>Settings</span></h1><p>Konfigurasi dasar KoiCode.</p></div><div class="panel settings-list"><div class="diagnostic-row"><span>Interface theme</span><b>Cyberpunk / Dark</b></div><div class="diagnostic-row"><span>AI mode</span><b>Local-first</b></div><div class="diagnostic-row"><span>Model strategy</span><b>Adaptive (planned)</b></div><div class="diagnostic-row"><span>Repository provider</span><b>GitHub manual (planned)</b></div><div class="diagnostic-row"><span>App version</span><b>0.1.0</b></div></div></section>
+    </main>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
