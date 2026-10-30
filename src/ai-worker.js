@@ -62,7 +62,7 @@ self.addEventListener("message", async event => {
       const answer = typeof last?.content === "string" ? last.content : (typeof generated === "string" ? generated : "");
       self.postMessage({type:"reply",text:answer.trim() || "Model returned no text."});
     } catch (error) {
-      self.postMessage({type:"error",message:error?.message || "Generation failed."});
+      self.postMessage({type:"generation-error",message:error?.message || "Generation failed."});
     }
   }
 });
