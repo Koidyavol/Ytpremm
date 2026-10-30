@@ -487,3 +487,141 @@ gh("repoFileSearch").addEventListener("input",renderGithubFiles);
 gh("importRepoFile").addEventListener("click",importGithubFile);
 gh("toggleToken").addEventListener("click",()=>{const input=gh("githubToken");input.type=input.type==="password"?"text":"password";gh("toggleToken").textContent=input.type==="password"?"Show":"Hide";});
 window.addEventListener("pagehide",()=>{githubToken="";});
+
+
+// V0.5 Local AI — model execution stays inside a dedicated browser worker.
+let aiWorker = null;
+let aiReady = false;
+let aiBusy = false;
+const aiConversation = [];
+const AI_MODEL_LABEL = "Qwen2.5-Coder-0.5B-Instruct";
+function aiStatus(message, state="") {
+  const el = $("aiStatus");
+  if (!el) return;
+  el.textContent = message;
+  el.className = "github-message " + state;
+}
+function setAIState(label) { $("aiState").textContent = label; }
+function setAIControls(ready, busy=false) {
+  aiReady = ready;
+  aiBusy = busy;
+  $("loadAIModel").disabled = ready || busy;
+  $("unloadAIModel").disabled = !aiWorker;
+  $("aiPrompt").disabled = !ready || busy;
+  $("sendAIMessage").disabled = !ready || busy;
+}
+function createAIWorker() {
+  if (aiWorker) return aiWorker;
+  aiWorker = new Worker(new URL("./ai-worker.js", import.meta.url), {type:"module"});
+  aiWorker.addEventListener("message", event => {
+    const data = event.data || {};
+    if (data.type === "progress") {
+      const progress = Number.isFinite(data.progress) ? Math.max(0,Math.min(100,data.progress)) : 0;
+      $("aiProgressBar").style.width = progress + "%";
+      const detail = data.file ? " · " + data.file.split("/").pop() : "";
+      aiStatus((data.message || "Loading model…") + detail, "pending");
+    } else if (data.type === "ready") {
+      $("aiProgressBar").style.width = "100%";
+      setAIState("READY · " + data.backend.toUpperCase());
+      aiStatus("Model loaded. Inference runs locally using " + data.backend + ".", "success");
+      setAIControls(true,false);
+      $("aiContextInfo").textContent = activePath ? "Context: " + activePath : "No file context selected";
+    } else if (data.type === "reply") {
+      appendAIMessage("assistant",data.text || "The model returned an empty response.");
+      setAIControls(true,false);
+    } else if (data.type === "error") {
+      aiStatus(data.message || "Local model error.", "error");
+      setAIState("ERROR");
+      setAIControls(false,false);
+      $("loadAIModel").disabled = false;
+      aiBusy = false;
+    } else if (data.type === "working") {
+      aiStatus(data.message || "Generating locally…","pending");
+    }
+  });
+  aiWorker.addEventListener("error", event => {
+    aiStatus("Worker error: " + (event.message || "unknown error"),"error");
+    setAIState("ERROR");
+    setAIControls(false,false);
+  });
+  return aiWorker;
+}
+function appendAIMessage(role, content) {
+  const log = $("aiChatLog");
+  const welcome = log.querySelector(".ai-welcome");
+  if (welcome) welcome.remove();
+  const article = document.createElement("article");
+  article.className = "ai-message " + role;
+  const label = document.createElement("div");
+  label.className = "ai-message-label";
+  label.textContent = role === "user" ? "YOU" : "KOICODE LOCAL AI";
+  const body = document.createElement("pre");
+  body.textContent = content;
+  article.append(label,body);
+  log.append(article);
+  log.scrollTop = log.scrollHeight;
+}
+function buildAIContext() {
+  if (!$("includeActiveFile").checked || !activePath) return "";
+  const current = workspace.get(activePath);
+  if (!current) return "";
+  const content = activePath === activePath && dirty ? codeEditor.value : current.content;
+  const clipped = content.length > 10000 ? content.slice(0,10000) + "\n… [file context truncated]" : content;
+  $("aiContextInfo").textContent = "Context: " + activePath + (content.length > 10000 ? " (truncated)" : "");
+  return "\n\nPROJECT FILE CONTEXT\nPath: " + activePath + "\n\`\`\`\n" + clipped + "\n\`\`\`";
+}
+async function loadLocalAI() {
+  if (aiWorker || aiBusy) return;
+  if (navigator.deviceMemory && navigator.deviceMemory < 3) {
+    const proceed = confirm("Browser melaporkan memori perangkat kurang dari 3 GB. Model dapat gagal dimuat atau menutup tab. Tetap coba?");
+    if (!proceed) return;
+  } else if (!confirm("Model coder 0.5B Q4 akan diunduh dari Hugging Face untuk pertama kali. File model dapat berukuran ratusan MB dan memakai memori cukup besar. Lanjutkan?")) return;
+  $("aiProgressBar").style.width = "0%";
+  setAIState("LOADING");
+  setAIControls(false,true);
+  aiStatus("Starting local model runtime…","pending");
+  try {
+    createAIWorker().postMessage({type:"load"});
+  } catch (error) {
+    aiStatus(error.message,"error");
+    setAIState("ERROR");
+    setAIControls(false,false);
+  }
+}
+function unloadLocalAI() {
+  if (aiWorker) aiWorker.terminate();
+  aiWorker = null;
+  aiConversation.length = 0;
+  aiReady = false;
+  aiBusy = false;
+  $("aiChatLog").replaceChildren();
+  const welcome = document.createElement("div");
+  welcome.className = "ai-welcome";
+  welcome.innerHTML = "<span>◉</span><b>Local AI is offline</b><p>Load the model to start a new local session.</p>";
+  $("aiChatLog").append(welcome);
+  $("aiProgressBar").style.width = "0%";
+  setAIState("NOT LOADED");
+  aiStatus("Model unloaded. Worker terminated; reload the model to use it again.");
+  setAIControls(false,false);
+  $("loadAIModel").disabled = false;
+}
+async function sendAIMessage(event) {
+  event.preventDefault();
+  const prompt = $("aiPrompt").value.trim();
+  if (!prompt || !aiReady || aiBusy || !aiWorker) return;
+  const context = buildAIContext();
+  appendAIMessage("user",prompt);
+  $("aiPrompt").value = "";
+  aiConversation.push({role:"user",content:prompt + context});
+  if (aiConversation.length > 8) aiConversation.splice(0,2);
+  aiBusy = true;
+  setAIControls(true,true);
+  aiWorker.postMessage({type:"generate",messages:aiConversation});
+}
+$("loadAIModel").addEventListener("click",loadLocalAI);
+$("unloadAIModel").addEventListener("click",unloadLocalAI);
+$("aiChatForm").addEventListener("submit",sendAIMessage);
+$("includeActiveFile").addEventListener("change",() => {
+  $("aiContextInfo").textContent = $("includeActiveFile").checked && activePath ? "Context: " + activePath : "No file context selected";
+});
+window.addEventListener("pagehide",()=>{ if(aiWorker) aiWorker.terminate(); aiWorker=null; aiReady=false; });
