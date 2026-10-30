@@ -74,8 +74,28 @@
         </div>
         <div class="panel model-placeholder"><div class="eyebrow">ADAPTIVE MODEL ROUTER</div><h3>Model selection is not active yet</h3><p>V0.4 akan memilih kandidat model berdasarkan dukungan runtime, ukuran model, context, dan batas memori. Tidak ada model yang diunduh pada V0.1.</p></div>
       </section>
-      <section class="view" id="view-projects"><div class="page-title"><div class="eyebrow">YOUR CODEBASES</div><h1>Project <span>Vault</span></h1><p>Repository workspace akan tersedia pada V0.2.</p></div><div class="panel empty-state"><div class="empty-symbol">▣</div><h3>No project connected</h3><p>Hubungkan repository GitHub untuk mulai membaca dan mengelola file proyek.</p><button class="btn primary" data-go="github">GitHub connection <span>↗</span></button></div></section>
-      <section class="view" id="view-github"><div class="page-title"><div class="eyebrow">SOURCE CONTROL</div><h1>GitHub <span>Link</span></h1><p>Koneksi manual dengan akses terbatas akan dibangun pada V0.2.</p></div><div class="panel model-placeholder"><div class="github-mark">⌂</div><h3>Repository integration — planned</h3><p>V0.1 belum meminta atau menyimpan Personal Access Token. Pada V0.2, token hanya akan digunakan dalam sesi aktif dan tidak ditulis ke source code atau localStorage.</p><span class="tag">COMING IN V0.2</span></div></section>
+      <section class="view" id="view-projects"><div class="page-title"><div class="eyebrow">YOUR CODEBASES</div><h1>Project <span>Vault</span></h1><p>Buka repository GitHub dan import file ke local workspace.</p></div><div class="panel empty-state"><div class="empty-symbol">▣</div><h3>No project connected</h3><p>Gunakan GitHub Link untuk membaca repository, atau import folder dari perangkat.</p><button class="btn primary" data-go="github">GitHub connection <span>↗</span></button></div></section>
+      <section class="view" id="view-github">
+        <div class="page-title"><div class="eyebrow">SOURCE CONTROL / READ-ONLY API</div><h1>GitHub <span>Link</span></h1><p>Hubungkan akun GitHub untuk membaca repository dan mengimpor file ke workspace.</p></div>
+        <div class="panel github-connect-panel">
+          <div class="panel-head"><div><div class="eyebrow">PERSONAL ACCESS TOKEN</div><h3 id="githubConnectionTitle">Connect your GitHub account</h3></div><span id="githubConnectionState" class="tag">DISCONNECTED</span></div>
+          <p class="github-help">Gunakan Personal Access Token (fine-grained) dengan akses <b>Metadata: Read-only</b> dan <b>Contents: Read-only</b> pada repository yang ingin dibaca. Token tidak pernah disimpan setelah halaman ditutup atau dimuat ulang.</p>
+          <label class="github-label" for="githubToken">GitHub token</label>
+          <div class="token-row"><input id="githubToken" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_..." aria-label="GitHub personal access token"><button id="toggleToken" class="btn ghost" type="button">Show</button></div>
+          <div class="github-actions"><button id="connectGithub" class="btn primary">Connect & load repositories</button><button id="disconnectGithub" class="btn ghost" disabled>Disconnect</button></div>
+          <p id="githubMessage" class="github-message" role="status">No token is stored. Paste a read-only token to begin.</p>
+        </div>
+        <div class="panel github-browser-panel">
+          <div class="panel-head"><div><div class="eyebrow">REPOSITORY BROWSER</div><h3>Browse your repositories</h3></div><button id="refreshRepos" class="btn ghost" disabled>↻ Refresh</button></div>
+          <div class="repo-controls"><label class="github-label" for="repoSelect">Repository</label><select id="repoSelect" disabled><option value="">Connect GitHub first</option></select><button id="loadRepo" class="btn primary" disabled>Open repository</button></div>
+          <div id="repoSummary" class="repo-summary">No repository selected.</div>
+          <div class="repo-browser-grid">
+            <div class="repo-file-panel"><div class="explorer-head"><span>FILES</span><span id="repoFileCount">0</span></div><input id="repoFileSearch" class="file-search" placeholder="Search repository files..." disabled><div id="repoFileTree" class="file-tree"><div class="tree-empty">Connect GitHub to browse files.</div></div></div>
+            <div class="repo-preview"><div class="explorer-head"><span id="repoPreviewName">FILE PREVIEW</span><button id="importRepoFile" disabled>＋ Import to workspace</button></div><pre id="repoPreviewContent">Select a text file from the repository.</pre></div>
+          </div>
+          <p class="notice">Read-only connection: KoiCode can fetch and import text files, but cannot push commits, edit remote files, or change repository settings.</p>
+        </div>
+      </section>
       <section class="view" id="view-assistant"><div class="page-title"><div class="eyebrow">LOCAL INFERENCE</div><h1>AI <span>Assistant</span></h1><p>Chat lokal akan diaktifkan setelah runtime dan model selesai diintegrasikan.</p></div><div class="panel empty-state"><div class="empty-symbol">◉</div><h3>AI engine not connected</h3><p>KoiCode tidak menggunakan AI cloud sebagai pengganti diam-diam. Status akan tetap offline sampai model lokal benar-benar aktif.</p><button class="btn ghost" data-go="models">Check compatibility</button></div></section>
       <section class="view" id="view-agent"><div class="page-title"><div class="eyebrow">AUTONOMOUS WORKFLOW</div><h1>Agent <span>Tasks</span></h1><p>Perencanaan dan eksekusi tugas multi-langkah akan hadir setelah AI engine tersedia.</p></div><div class="panel empty-state"><div class="empty-symbol">⟡</div><h3>Agent engine offline</h3><p>Task planner, file operations, review, dan test runner belum aktif pada V0.1.</p></div></section>
       <section class="view" id="view-editor">
@@ -99,7 +119,7 @@
         </div>
         <p class="editor-note">File disimpan di penyimpanan browser perangkat ini (IndexedDB). Perubahan belum dikirim ke GitHub. Gunakan Export Workspace untuk membuat cadangan JSON.</p>
       </section>
-      <section class="view" id="view-settings"><div class="page-title"><div class="eyebrow">PREFERENCES</div><h1>System <span>Settings</span></h1><p>Konfigurasi dasar KoiCode.</p></div><div class="panel settings-list"><div class="diagnostic-row"><span>Interface theme</span><b>Cyberpunk / Dark</b></div><div class="diagnostic-row"><span>AI mode</span><b>Local-first</b></div><div class="diagnostic-row"><span>Model strategy</span><b>Adaptive (planned)</b></div><div class="diagnostic-row"><span>Repository provider</span><b>GitHub manual (planned)</b></div><div class="diagnostic-row"><span>App version</span><b>0.3.0</b></div></div></section>
+      <section class="view" id="view-settings"><div class="page-title"><div class="eyebrow">PREFERENCES</div><h1>System <span>Settings</span></h1><p>Konfigurasi dasar KoiCode.</p></div><div class="panel settings-list"><div class="diagnostic-row"><span>Interface theme</span><b>Cyberpunk / Dark</b></div><div class="diagnostic-row"><span>AI mode</span><b>Local-first</b></div><div class="diagnostic-row"><span>Model strategy</span><b>Adaptive (planned)</b></div><div class="diagnostic-row"><span>Repository provider</span><b>GitHub manual (read-only)</b></div><div class="diagnostic-row"><span>App version</span><b>0.4.0</b></div></div></section>
     </main>
   </div>
   <script type="module" src="./src/main.js"></script>
