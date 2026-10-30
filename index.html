@@ -19,7 +19,7 @@
         <button class="nav-item" data-view="projects"><span>▣</span> Projects <em>V0.2</em></button>
         <button class="nav-item" data-view="assistant"><span>⌘</span> AI Assistant <em>V0.4</em></button>
         <button class="nav-item" data-view="agent"><span>⟡</span> Agent Tasks <em>V0.6</em></button>
-        <button class="nav-item" data-view="editor"><span>⌗</span> Code Editor <em>V0.3</em></button>
+        <button class="nav-item" data-view="editor"><span>⌗</span> Code Editor <em>LIVE</em></button>
       </nav>
       <div class="side-label second">SYSTEM</div>
       <nav class="nav">
@@ -48,9 +48,9 @@
           </div>
           <div class="core-visual" aria-label="KoiCode system visualization"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="core"><span>KOI</span><small>CORE</small></div><div class="orbit-tag tag-one">LOCAL AI</div><div class="orbit-tag tag-two">AGENT SYSTEM</div><div class="orbit-tag tag-three">GITHUB</div></div>
         </div>
-        <div class="section-heading"><div><div class="eyebrow">SYSTEM OVERVIEW</div><h2>Workspace status</h2></div><span class="muted">BUILD 0.1.0 / PREVIEW</span></div>
+        <div class="section-heading"><div><div class="eyebrow">SYSTEM OVERVIEW</div><h2>Workspace status</h2></div><span class="muted">BUILD 0.3.0 / WORKSPACE</span></div>
         <div class="stats-grid">
-          <article class="stat-card"><div class="stat-icon cyan">▣</div><span>PROJECTS</span><strong>0</strong><small>No repositories connected</small></article>
+          <article class="stat-card"><div class="stat-icon cyan">▣</div><span>PROJECTS</span><strong id="projectCount">0</strong><small>Local files in workspace</small></article>
           <article class="stat-card"><div class="stat-icon purple">◉</div><span>LOCAL MODEL</span><strong class="small-value">Not loaded</strong><small>Waiting for compatibility check</small></article>
           <article class="stat-card"><div class="stat-icon pink">⟡</div><span>AGENT TASKS</span><strong>0</strong><small>Agent engine planned for V0.6</small></article>
           <article class="stat-card"><div class="stat-icon green">⌂</div><span>GITHUB</span><strong class="small-value">Not linked</strong><small>Manual connection planned for V0.2</small></article>
@@ -59,7 +59,7 @@
           <article class="panel quick-panel"><div class="panel-head"><div><div class="eyebrow">GET STARTED</div><h3>Initialize your workspace</h3></div><span class="panel-number">01—04</span></div>
             <button class="setup-row" data-go="models"><span class="step">01</span><span><b>Check browser compatibility</b><small>Inspect WebGPU and device capabilities</small></span><span class="arrow">↗</span></button>
             <button class="setup-row" data-go="github"><span class="step">02</span><span><b>Connect GitHub</b><small>Repository access will be added in V0.2</small></span><span class="lock">V0.2</span></button>
-            <button class="setup-row" data-go="projects"><span class="step">03</span><span><b>Select a project</b><small>Import a repository into workspace</small></span><span class="lock">V0.2</span></button>
+            <button class="setup-row" data-go="projects"><span class="step">03</span><span><b>Open a local project</b><small>Import a folder from your device</small></span><span class="arrow">↗</span></button>
             <button class="setup-row" data-go="assistant"><span class="step">04</span><span><b>Load a local model</b><small>Adaptive model selection is planned</small></span><span class="lock">V0.4</span></button>
           </article>
           <article class="panel activity-panel"><div class="panel-head"><div><div class="eyebrow">LIVE FEED</div><h3>Activity log</h3></div><span class="live-dot">● LIVE</span></div><div class="empty-activity"><div class="empty-symbol">⌁</div><b>No activity yet</b><p>System events and agent actions will appear here.</p></div></article>
@@ -78,8 +78,28 @@
       <section class="view" id="view-github"><div class="page-title"><div class="eyebrow">SOURCE CONTROL</div><h1>GitHub <span>Link</span></h1><p>Koneksi manual dengan akses terbatas akan dibangun pada V0.2.</p></div><div class="panel model-placeholder"><div class="github-mark">⌂</div><h3>Repository integration — planned</h3><p>V0.1 belum meminta atau menyimpan Personal Access Token. Pada V0.2, token hanya akan digunakan dalam sesi aktif dan tidak ditulis ke source code atau localStorage.</p><span class="tag">COMING IN V0.2</span></div></section>
       <section class="view" id="view-assistant"><div class="page-title"><div class="eyebrow">LOCAL INFERENCE</div><h1>AI <span>Assistant</span></h1><p>Chat lokal akan diaktifkan setelah runtime dan model selesai diintegrasikan.</p></div><div class="panel empty-state"><div class="empty-symbol">◉</div><h3>AI engine not connected</h3><p>KoiCode tidak menggunakan AI cloud sebagai pengganti diam-diam. Status akan tetap offline sampai model lokal benar-benar aktif.</p><button class="btn ghost" data-go="models">Check compatibility</button></div></section>
       <section class="view" id="view-agent"><div class="page-title"><div class="eyebrow">AUTONOMOUS WORKFLOW</div><h1>Agent <span>Tasks</span></h1><p>Perencanaan dan eksekusi tugas multi-langkah akan hadir setelah AI engine tersedia.</p></div><div class="panel empty-state"><div class="empty-symbol">⟡</div><h3>Agent engine offline</h3><p>Task planner, file operations, review, dan test runner belum aktif pada V0.1.</p></div></section>
-      <section class="view" id="view-editor"><div class="page-title"><div class="eyebrow">CODE WORKSPACE</div><h1>Code <span>Editor</span></h1><p>Editor dan file explorer akan dibangun pada V0.3.</p></div><div class="panel empty-state"><div class="empty-symbol">⌗</div><h3>No workspace opened</h3><p>Belum ada repository yang terhubung.</p></div></section>
-      <section class="view" id="view-settings"><div class="page-title"><div class="eyebrow">PREFERENCES</div><h1>System <span>Settings</span></h1><p>Konfigurasi dasar KoiCode.</p></div><div class="panel settings-list"><div class="diagnostic-row"><span>Interface theme</span><b>Cyberpunk / Dark</b></div><div class="diagnostic-row"><span>AI mode</span><b>Local-first</b></div><div class="diagnostic-row"><span>Model strategy</span><b>Adaptive (planned)</b></div><div class="diagnostic-row"><span>Repository provider</span><b>GitHub manual (planned)</b></div><div class="diagnostic-row"><span>App version</span><b>0.1.0</b></div></div></section>
+      <section class="view" id="view-editor">
+        <div class="page-title editor-title"><div><div class="eyebrow">CODE WORKSPACE / LOCAL FILES</div><h1>Code <span>Editor</span></h1><p>Import folder proyek dari perangkat, edit file, lalu simpan secara lokal.</p></div><div class="editor-actions"><button class="btn ghost" id="importFolder">▣ Import folder</button><button class="btn ghost" id="importFiles">＋ Add files</button><button class="btn primary" id="newFile">＋ New file</button></div></div>
+        <input id="folderInput" type="file" webkitdirectory directory multiple hidden>
+        <input id="filesInput" type="file" multiple hidden>
+        <div class="workspace-shell">
+          <aside class="file-explorer">
+            <div class="explorer-head"><span>EXPLORER</span><button id="exportWorkspace" title="Export workspace JSON">⇩</button></div>
+            <div class="workspace-name"><span class="pulse"></span><b id="workspaceName">NO FOLDER OPENED</b></div>
+            <input id="fileSearch" class="file-search" placeholder="Search files..." autocomplete="off">
+            <div id="fileTree" class="file-tree"><div class="tree-empty">Import a folder to see its files.</div></div>
+            <div class="explorer-foot"><span id="fileCount">0 FILES</span><span>LOCAL</span></div>
+          </aside>
+          <section class="editor-main">
+            <div class="editor-toolbar"><div class="editor-tab" id="activeTab">NO FILE OPEN</div><div class="editor-toolbar-actions"><span id="editState" class="edit-state">READY</span><button id="downloadFile" disabled>↓ Download</button><button id="saveFile" class="save-button" disabled>Save</button></div></div>
+            <div class="editor-empty" id="editorEmpty"><div class="empty-symbol">⌗</div><h3>Workspace ready</h3><p>Import folder dari HP atau tambahkan beberapa file untuk mulai mengedit.</p><button class="btn primary" id="emptyImport">Import project folder</button></div>
+            <div class="code-area" id="codeArea" hidden><div class="line-numbers" id="lineNumbers">1</div><textarea id="codeEditor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Code editor" disabled></textarea></div>
+            <div class="editor-statusbar"><span id="languageLabel">PLAIN TEXT</span><span id="cursorInfo">Ln 1, Col 1</span><span>UTF-8</span><span>LOCAL WORKSPACE</span></div>
+          </section>
+        </div>
+        <p class="editor-note">File disimpan di penyimpanan browser perangkat ini (IndexedDB). Perubahan belum dikirim ke GitHub. Gunakan Export Workspace untuk membuat cadangan JSON.</p>
+      </section>
+      <section class="view" id="view-settings"><div class="page-title"><div class="eyebrow">PREFERENCES</div><h1>System <span>Settings</span></h1><p>Konfigurasi dasar KoiCode.</p></div><div class="panel settings-list"><div class="diagnostic-row"><span>Interface theme</span><b>Cyberpunk / Dark</b></div><div class="diagnostic-row"><span>AI mode</span><b>Local-first</b></div><div class="diagnostic-row"><span>Model strategy</span><b>Adaptive (planned)</b></div><div class="diagnostic-row"><span>Repository provider</span><b>GitHub manual (planned)</b></div><div class="diagnostic-row"><span>App version</span><b>0.3.0</b></div></div></section>
     </main>
   </div>
   <script type="module" src="./src/main.js"></script>
