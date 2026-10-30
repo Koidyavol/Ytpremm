@@ -16,7 +16,7 @@
       <div class="side-label">WORKSPACE</div>
       <nav class="nav" aria-label="Main navigation">
         <button class="nav-item active" data-view="dashboard"><span>◈</span> Dashboard</button>
-        <button class="nav-item" data-view="projects"><span>▣</span> Projects <em>V0.2</em></button>
+        <button class="nav-item" data-view="projects"><span>▣</span> Projects <em>V0.5</em></button>
         <button class="nav-item" data-view="assistant"><span>⌘</span> AI Assistant <em>V0.4</em></button>
         <button class="nav-item" data-view="agent"><span>⟡</span> Agent Tasks <em>V0.6</em></button>
         <button class="nav-item" data-view="editor"><span>⌗</span> Code Editor <em>LIVE</em></button>
@@ -96,7 +96,25 @@
           <p class="notice">Read-only connection: KoiCode can fetch and import text files, but cannot push commits, edit remote files, or change repository settings.</p>
         </div>
       </section>
-      <section class="view" id="view-assistant"><div class="page-title"><div class="eyebrow">LOCAL INFERENCE</div><h1>AI <span>Assistant</span></h1><p>Chat lokal akan diaktifkan setelah runtime dan model selesai diintegrasikan.</p></div><div class="panel empty-state"><div class="empty-symbol">◉</div><h3>AI engine not connected</h3><p>KoiCode tidak menggunakan AI cloud sebagai pengganti diam-diam. Status akan tetap offline sampai model lokal benar-benar aktif.</p><button class="btn ghost" data-go="models">Check compatibility</button></div></section>
+      <section class="view" id="view-assistant">
+        <div class="page-title"><div class="eyebrow">LOCAL INFERENCE / ON-DEVICE</div><h1>AI <span>Assistant</span></h1><p>Model coder berjalan di browser perangkat. Prompt dan kode yang dikirim ke AI diproses lokal.</p></div>
+        <div class="panel local-model-panel">
+          <div class="panel-head"><div><div class="eyebrow">LOCAL MODEL RUNTIME</div><h3>Qwen2.5-Coder 0.5B Instruct</h3></div><span id="aiState" class="tag">NOT LOADED</span></div>
+          <p class="github-help">Model kecil 4-bit untuk uji coba perangkat dengan RAM terbatas. Unduhan model pertama kali memerlukan internet; setelah dimuat, inferensi berlangsung di perangkat. Performa dan kompatibilitas HP tidak dijamin.</p>
+          <div class="model-meta"><span>0.5B parameters</span><span>Q4 quantization</span><span>WASM / WebGPU</span></div>
+          <div class="ai-progress-track"><div id="aiProgressBar"></div></div>
+          <p id="aiStatus" class="github-message">Model belum dimuat. Periksa ruang penyimpanan dan koneksi internet sebelum mulai.</p>
+          <div class="github-actions"><button id="loadAIModel" class="btn primary">↓ Download & load model</button><button id="unloadAIModel" class="btn ghost" disabled>Unload model</button></div>
+          <p class="notice">Peringatan perangkat: model 0.5B tetap dapat memakai memori besar. Tutup tab/aplikasi lain jika perangkat kehabisan memori. Jangan mulai jika ruang penyimpanan hampir penuh.</p>
+        </div>
+        <div class="panel ai-chat-panel">
+          <div class="panel-head"><div><div class="eyebrow">CODE REASONING</div><h3>Ask your local model</h3></div><span class="tag">NO CLOUD FALLBACK</span></div>
+          <label class="ai-context-toggle"><input id="includeActiveFile" type="checkbox" checked> Include currently open file as context</label>
+          <div id="aiChatLog" class="ai-chat-log"><div class="ai-welcome"><span>◉</span><b>Local AI is offline</b><p>Load the model first. Then ask it to explain code, find likely bugs, or suggest a small change.</p></div></div>
+          <form id="aiChatForm" class="ai-chat-form"><textarea id="aiPrompt" rows="3" placeholder="Ask about your code…" maxlength="4000" disabled required></textarea><div class="ai-chat-footer"><span id="aiContextInfo">No file context selected</span><button id="sendAIMessage" class="btn primary" type="submit" disabled>Send ↗</button></div></form>
+          <p class="notice">V0.5 hanya menjawab dan memberi saran. AI belum boleh mengubah file otomatis, menjalankan terminal, atau melakukan commit.</p>
+        </div>
+      </section>
       <section class="view" id="view-agent"><div class="page-title"><div class="eyebrow">AUTONOMOUS WORKFLOW</div><h1>Agent <span>Tasks</span></h1><p>Perencanaan dan eksekusi tugas multi-langkah akan hadir setelah AI engine tersedia.</p></div><div class="panel empty-state"><div class="empty-symbol">⟡</div><h3>Agent engine offline</h3><p>Task planner, file operations, review, dan test runner belum aktif pada V0.1.</p></div></section>
       <section class="view" id="view-editor">
         <div class="page-title editor-title"><div><div class="eyebrow">CODE WORKSPACE / LOCAL FILES</div><h1>Code <span>Editor</span></h1><p>Import folder proyek dari perangkat, edit file, lalu simpan secara lokal.</p></div><div class="editor-actions"><button class="btn ghost" id="importFolder">▣ Import folder</button><button class="btn ghost" id="importFiles">＋ Add files</button><button class="btn primary" id="newFile">＋ New file</button></div></div>
@@ -119,7 +137,7 @@
         </div>
         <p class="editor-note">File disimpan di penyimpanan browser perangkat ini (IndexedDB). Perubahan belum dikirim ke GitHub. Gunakan Export Workspace untuk membuat cadangan JSON.</p>
       </section>
-      <section class="view" id="view-settings"><div class="page-title"><div class="eyebrow">PREFERENCES</div><h1>System <span>Settings</span></h1><p>Konfigurasi dasar KoiCode.</p></div><div class="panel settings-list"><div class="diagnostic-row"><span>Interface theme</span><b>Cyberpunk / Dark</b></div><div class="diagnostic-row"><span>AI mode</span><b>Local-first</b></div><div class="diagnostic-row"><span>Model strategy</span><b>Adaptive (planned)</b></div><div class="diagnostic-row"><span>Repository provider</span><b>GitHub manual (read-only)</b></div><div class="diagnostic-row"><span>App version</span><b>0.4.0</b></div></div></section>
+      <section class="view" id="view-settings"><div class="page-title"><div class="eyebrow">PREFERENCES</div><h1>System <span>Settings</span></h1><p>Konfigurasi dasar KoiCode.</p></div><div class="panel settings-list"><div class="diagnostic-row"><span>Interface theme</span><b>Cyberpunk / Dark</b></div><div class="diagnostic-row"><span>AI mode</span><b>Local-first</b></div><div class="diagnostic-row"><span>Model strategy</span><b>Adaptive (planned)</b></div><div class="diagnostic-row"><span>Repository provider</span><b>GitHub manual (read-only)</b></div><div class="diagnostic-row"><span>App version</span><b>0.5.0</b></div></div></section>
     </main>
   </div>
   <script type="module" src="./src/main.js"></script>
