@@ -527,11 +527,19 @@ function createAIWorker() {
       setAIControls(true,false);
       $("aiContextInfo").textContent = activePath ? "Context: " + activePath : "No file context selected";
     } else if (data.type === "reply") {
-      appendAIMessage("assistant",data.text || "The model returned an empty response.");
+      const answer = data.text || "The model returned an empty response.";
+      appendAIMessage("assistant",answer);
+      aiConversation.push({role:"assistant",content:answer});
+      if (aiConversation.length > 8) aiConversation.splice(0,2);
+      setAIControls(true,false);
+    } else if (data.type === "generation-error") {
+      aiStatus(data.message || "Generation failed. The model remains loaded.", "error");
       setAIControls(true,false);
     } else if (data.type === "error") {
       aiStatus(data.message || "Local model error.", "error");
       setAIState("ERROR");
+      if (aiWorker) aiWorker.terminate();
+      aiWorker = null;
       setAIControls(false,false);
       $("loadAIModel").disabled = false;
       aiBusy = false;
@@ -542,7 +550,10 @@ function createAIWorker() {
   aiWorker.addEventListener("error", event => {
     aiStatus("Worker error: " + (event.message || "unknown error"),"error");
     setAIState("ERROR");
+    if (aiWorker) aiWorker.terminate();
+    aiWorker = null;
     setAIControls(false,false);
+    $("loadAIModel").disabled = false;
   });
   return aiWorker;
 }
@@ -565,7 +576,7 @@ function buildAIContext() {
   if (!$("includeActiveFile").checked || !activePath) return "";
   const current = workspace.get(activePath);
   if (!current) return "";
-  const content = activePath === activePath && dirty ? codeEditor.value : current.content;
+  const content = dirty ? codeEditor.value : current.content;
   const clipped = content.length > 10000 ? content.slice(0,10000) + "\n… [file context truncated]" : content;
   $("aiContextInfo").textContent = "Context: " + activePath + (content.length > 10000 ? " (truncated)" : "");
   return "\n\nPROJECT FILE CONTEXT\nPath: " + activePath + "\n\`\`\`\n" + clipped + "\n\`\`\`";
